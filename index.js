@@ -94,7 +94,7 @@ async function run() {
     });
 
     //stripe payment
-    app.post('/create-payment-intern', async (req, res) => {
+    app.post('/create-payment-intent', async (req, res) => {
       const booking = req.body;
       const price = booking.price;
       const amount = price * 100;
