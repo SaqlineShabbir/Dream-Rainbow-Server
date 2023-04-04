@@ -5,7 +5,7 @@ const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
 const port = process.env.PORT || 5000;
-
+const stripe = require('stripe')(process.env.STRIP_SECRET);
 //middleware
 app.use(cors());
 app.use(express.json());
@@ -47,6 +47,7 @@ async function run() {
       const cars = await cursor.toArray();
       res.send(cars);
     });
+
     //delete car from manage services page
     app.delete('/service/:id', async (req, res) => {
       const id = req.params.id;
@@ -90,6 +91,23 @@ async function run() {
       const result = await bookingCollection.deleteOne(query);
       console.log('deleting user with id', result);
       res.json(result);
+    });
+
+    //stripe payment
+    app.post('/create-payment-intern', async (req, res) => {
+      const booking = req.body;
+      const price = booking.price;
+      const amount = price * 100;
+
+      const paymentIntent = await paymentIntents.create({
+        currency: 'usd',
+        amount: amount,
+        payment_method_types: ['card'],
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
 
     // post users
